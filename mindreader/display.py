@@ -47,27 +47,31 @@ def show_round(number: int, bot, rnd: RoundResult, taunt: str) -> None:
         verdict = paint("Bot wins!", "red")
     else:
         verdict = paint("Tie.", "yellow")
-    print(f"  Round {number}: you {rnd.player.emoji}  vs  {rnd.bot.emoji} {bot.name}  →  {verdict}")
-    print(paint(f"  {bot.emoji} \"I was {rnd.confidence:.0%} sure you'd throw {rnd.guess.label}.\" {taunt}\n", "dim"))
+    print(
+        f"  Round {number}: you {rnd.player.emoji}  vs  {rnd.bot.emoji} {bot.name}  →  {verdict}")
+    print(paint(
+        f"  {bot.emoji} \"I was {rnd.confidence:.0%} sure you'd throw {rnd.guess.label}.\" {taunt}\n", "dim"))
 
 
 def final_score(bot, match: Match) -> None:
     print(paint("═" * 50, "cyan"))
-    print(f"  You {match.player_score}  ·  {bot.name} {match.bot_score}  ·  Ties {match.ties}")
+    print(
+        f"  You {match.player_score}  ·  {bot.name} {match.bot_score}  ·  Ties {match.ties}")
     score = match.predictability
     if score >= 0.5:
         mood = "You're an open book! 📖"
     elif score >= 0.34:
         mood = "A bit readable. Mix it up! 🤔"
     else:
-        mood = "Unreadable. A true enigma. 🥷"
+        mood = "Unreadable. A true enigma. 🥷👎"
     print(f"  Predictability: {paint(f'{score:.0%}', 'bold')}  {mood}")
     print(paint("═" * 50, "cyan"))
 
 
 def bot_list(bots) -> None:
     for bot_id, cls in bots.items():
-        print(f"  {cls.emoji}  {paint(f'{bot_id:<12}', 'bold')} {cls.name}: {cls.description}")
+        print(f"  {cls.emoji}  {paint(f'{bot_id:<12}', 'bold')} {
+              cls.name}: {cls.description}")
 
 
 def leaderboard(rows: List[Tuple[str, str, int, int, int]]) -> None:
