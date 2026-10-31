@@ -43,6 +43,12 @@ class SmartBotsTest(unittest.TestCase):
         self.assertEqual(guess, Move.ROCK)
         self.assertEqual(confidence, 1.0)
 
+    def test_pattern_breaker_learns_a_cycle(self):
+        cycle = [Move.ROCK, Move.ROCK, Move.PAPER] * 2
+        history = [(move, Move.ROCK) for move in cycle]
+        guess, _ = all_bots()["pattern_breaker"]().predict(history)
+        self.assertEqual(guess, Move.ROCK)
+
 
 if __name__ == "__main__":
     unittest.main()
