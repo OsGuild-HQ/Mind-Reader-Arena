@@ -58,7 +58,7 @@ def final_score(bot, match: Match) -> None:
     if score >= 0.5:
         mood = "You're an open book! 📖"
     elif score >= 0.34:
-        mood = "A bit readable. Mix it up! 🤔"
+        mood = "A bit readable. Mix it up a bit more! 🤔"
     else:
         mood = "Unreadable. A true enigma. 🥷"
     print(f"  Predictability: {paint(f'{score:.0%}', 'bold')}  {mood}")
