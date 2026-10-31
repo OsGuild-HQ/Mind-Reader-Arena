@@ -1,25 +1,31 @@
-from pattern_breaker import get_move
+import random
+from collections import Counter
 
-def test_bot():
-    test_cases = [
-        [],
-        ["rock"],
-        ["rock", "paper", "scissors"],
-        ["rock", "rock", "paper", "rock", "rock", "paper"],
-        ["scissors", "scissors", "rock", "scissors", "scissors", "rock"]
-    ]
-
-    for history in test_cases:
-        move = get_move(history)
-
-        print(f"Opponent history: {history}")
-        print(f"Bot chooses: {move}")
-        print("-" * 40)
-
-        assert move in ["rock", "paper", "scissors"]
-
-    print("All tests passed!")
+from mindreader.bots import Bot
+from mindreader.game import Move
 
 
-if __name__ == "__main__":
-    test_bot()
+class PatternBreaker(Bot):
+    name = "Pattern Breaker"
+    emoji = "🧩"
+    description = "Spots repeating cycles in your moves and jumps to the next one."
+    win_taunts = ["Your pattern is broken.", "Predictable rhythm, really."]
+    lose_taunts = ["A chaotic choice... clever.", "I'll find the new pattern."]
+
+    def predict(self, history):
+        moves = [opponent for opponent, _ in history]
+        period = self._find_period(moves)
+        if period:
+            return moves[-period], 0.6
+        if not moves:
+            return random.choice(list(Move)), 1 / 3
+        counts = Counter(moves)
+        favourite, times = counts.most_common(1)[0]
+        return favourite, times / len(moves)
+
+    @staticmethod
+    def _find_period(moves):
+        for period in range(1, len(moves) // 2 + 1):
+            if moves[-period:] == moves[-2 * period:-period]:
+                return period
+        return None
