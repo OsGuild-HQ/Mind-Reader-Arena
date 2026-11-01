@@ -1,6 +1,6 @@
 import unittest
 
-from mindreader.game import Match, Move, beats, counter, outcome, run_duel
+from mindreader.game import Match, Move, beats, counter, iter_duel, outcome, run_duel
 
 
 class RulesTest(unittest.TestCase):
@@ -47,6 +47,44 @@ class DuelTest(unittest.TestCase):
 
         a_wins, b_wins, ties = run_duel(AlwaysGuessRock(), AlwaysGuessRock(), rounds=10)
         self.assertEqual((a_wins, b_wins, ties), (0, 0, 10))
+
+    def test_iter_duel_yields_every_round(self):
+        class AlwaysGuessRock:
+            def predict(self, history):
+                return Move.ROCK, 1.0
+
+        rounds = list(iter_duel(AlwaysGuessRock(), AlwaysGuessRock(), rounds=5))
+        self.assertEqual(len(rounds), 5)
+        for rnd in rounds:
+            self.assertEqual((rnd.a_move, rnd.b_move), (Move.PAPER, Move.PAPER))
+            self.assertEqual(rnd.result, 0)
+
+    def test_iter_duel_result_favours_the_winner(self):
+        class AlwaysGuessRock:
+            def predict(self, history):
+                return Move.ROCK, 1.0
+
+        class AlwaysGuessPaper:
+            def predict(self, history):
+                return Move.PAPER, 1.0
+
+        rnd = next(iter_duel(AlwaysGuessRock(), AlwaysGuessPaper(), rounds=1))
+        self.assertEqual((rnd.a_move, rnd.b_move), (Move.PAPER, Move.SCISSORS))
+        self.assertEqual(rnd.result, -1)
+
+    def test_run_duel_matches_iter_duel(self):
+        class AlwaysGuessRock:
+            def predict(self, history):
+                return Move.ROCK, 1.0
+
+        class AlwaysGuessPaper:
+            def predict(self, history):
+                return Move.PAPER, 1.0
+
+        totals = run_duel(AlwaysGuessRock(), AlwaysGuessPaper(), rounds=10)
+        rounds = list(iter_duel(AlwaysGuessRock(), AlwaysGuessPaper(), rounds=10))
+        self.assertEqual(totals, (0, 10, 0))
+        self.assertEqual(len(rounds), 10)
 
 
 if __name__ == "__main__":

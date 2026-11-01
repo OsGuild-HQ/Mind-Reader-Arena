@@ -22,6 +22,7 @@ Requires Python 3.9+. Nothing to install.
 |---|---|
 | `python3 -m mindreader play --bot frequency --rounds 5` | Play against a specific bot |
 | `python3 -m mindreader bots` | List every bot in the arena |
+| `python3 -m mindreader duel random_bot markov --rounds 5` | Watch two bots fight round-by-round 🍿 |
 | `python3 -m mindreader tournament` | Every bot fights every other bot and you get a leaderboard 🏆 |
 
 ## Example

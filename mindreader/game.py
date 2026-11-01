@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
+from typing import Iterator, List, Optional, Tuple
 
 
 class Move(enum.Enum):
@@ -70,6 +70,17 @@ class RoundResult:
 
 
 @dataclass
+class DuelRound:
+    a_guess: Move
+    a_confidence: float
+    b_guess: Move
+    b_confidence: float
+    a_move: Move
+    b_move: Move
+    result: int  # 1 = a won, -1 = b won, 0 = tie
+
+
+@dataclass
 class Match:
     """Player vs one bot. The bot guesses the player's move and plays its counter."""
 
@@ -99,21 +110,29 @@ class Match:
         return self.correct_guesses / len(self.history) if self.history else 0.0
 
 
-def run_duel(bot_a, bot_b, rounds: int) -> Tuple[int, int, int]:
-    """Bot vs bot. Returns (a_wins, b_wins, ties)."""
+def iter_duel(bot_a, bot_b, rounds: int) -> Iterator[DuelRound]:
+    """Bot vs bot, yielding each round's details as it happens."""
     a_history: History = []
     b_history: History = []
-    a_wins = b_wins = ties = 0
     for _ in range(rounds):
-        a_move = counter(bot_a.predict(a_history)[0])
-        b_move = counter(bot_b.predict(b_history)[0])
+        a_guess, a_confidence = bot_a.predict(a_history)
+        b_guess, b_confidence = bot_b.predict(b_history)
+        a_move = counter(a_guess)
+        b_move = counter(b_guess)
         result = outcome(a_move, b_move)
-        if result > 0:
+        a_history.append((b_move, a_move))
+        b_history.append((a_move, b_move))
+        yield DuelRound(a_guess, a_confidence, b_guess, b_confidence, a_move, b_move, result)
+
+
+def run_duel(bot_a, bot_b, rounds: int) -> Tuple[int, int, int]:
+    """Bot vs bot. Returns (a_wins, b_wins, ties)."""
+    a_wins = b_wins = ties = 0
+    for rnd in iter_duel(bot_a, bot_b, rounds):
+        if rnd.result > 0:
             a_wins += 1
-        elif result < 0:
+        elif rnd.result < 0:
             b_wins += 1
         else:
             ties += 1
-        a_history.append((b_move, a_move))
-        b_history.append((a_move, b_move))
     return a_wins, b_wins, ties
